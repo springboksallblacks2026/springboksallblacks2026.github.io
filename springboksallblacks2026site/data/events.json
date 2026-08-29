@@ -1,0 +1,47 @@
+{
+  "_comment": "Curated event cards. To add an event, copy a block below and fill it in. Fields: tile = tailgate | pregame | watch | generic (picks the card image); type = short label shown on the image; badge = optional pill like 'No ticket needed'; url = the ORIGINAL public listing/post the button opens; source = short name of that site shown on the button.",
+  "events": [
+    {
+      "id": "braai-army",
+      "tile": "tailgate",
+      "type": "Tailgate",
+      "dateBadge": { "month": "Sep", "day": "12" },
+      "title": "Braai Army supporters block + TailGOAT tailgate",
+      "when": "From midday until kickoff",
+      "where": "Outside M&T Bank Stadium",
+      "badge": null,
+      "description": "The official Springbok supporters group: a 650-seat supporters block inside the ground and a full pre-match tailgate outside — braai fires, drinks, music, gees. Already ticketed? Their “Commando” option covers just the social.",
+      "linkLabel": "View Original Event",
+      "url": "https://www.braaiarmy.com/springboks-all-blacks-baltimore-old-page",
+      "source": "braaiarmy.com"
+    },
+    {
+      "id": "gameday-firehouse",
+      "tile": "pregame",
+      "type": "Pregame",
+      "dateBadge": { "month": "Sep", "day": "12" },
+      "title": "Gameday Firehouse pregame",
+      "when": "12:30 PM – 8:00 PM",
+      "where": "1202 Ridgely St — steps from the stadium",
+      "badge": null,
+      "description": "A converted firehouse turned sports bar right beside the ground, opening early for the match. Food, drinks, and traveling fans from everywhere before the short walk to the gates.",
+      "linkLabel": "View Original Event",
+      "url": "https://baltimore.org/event/all-blacks-vs-springboks-pregame-rugbys-greatest-rivalry/",
+      "source": "baltimore.org"
+    },
+    {
+      "id": "uct-watch-party",
+      "tile": "watch",
+      "type": "Watch party",
+      "dateBadge": { "month": "Sep", "day": "12" },
+      "title": "UCT Alumni & Friends watch party",
+      "when": "Match time — arrive early for a seat",
+      "where": "One Star Country Club, 38 E Cross St, Federal Hill",
+      "badge": "No ticket needed",
+      "description": "University of Cape Town alumni host a watch party in Federal Hill — food and drinks for purchase, SA expats and friends welcome. If you couldn’t get a seat, this is the room with the gees.",
+      "linkLabel": "View Original Event",
+      "url": "https://alumni.uct.ac.za/events/springboks-vs-all-black-rugby-watch-party-0",
+      "source": "alumni.uct.ac.za"
+    }
+  ]
+}

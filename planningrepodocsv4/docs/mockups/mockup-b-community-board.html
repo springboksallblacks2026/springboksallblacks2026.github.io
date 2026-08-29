@@ -1,0 +1,526 @@
+<title>Charm City Scrum</title>
+<!--
+  MOCKUP B — "Charm City Scrum" (community-board-first)
+  ─────────────────────────────────────────────────────
+  What this demonstrates: the board IS the product. A filterable, searchable
+  feed mixing three source types — organized events (public listings),
+  auto-pulled Reddit threads, and fan submissions via a no-account form —
+  plus a compact matchday-facts rail and a schematic "where fans gather" map.
+
+  The filter chips, search box, and "Post to the board" modal all WORK in
+  this mockup, to prove a static GitHub Pages site can feel like an app.
+
+  REAL content is labeled with its public source and linked. SAMPLE posts
+  (the kind the board is designed to collect) carry a "sample" chip.
+
+  Dark-first design: bare :root holds the dark palette; light theme is the
+  override. Authored in Claude Artifact format (no <html>/<head>/<body>).
+-->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow:wght@400;500;600&family=Chivo+Mono:wght@400;500&display=swap">
+<style>
+  /* ── Tokens: dark-first (floodlights), light override ──────────── */
+  :root{
+    --bg:#101418;
+    --card:#181E25;
+    --card2:#1E252E;
+    --ink:#EDEFF2;
+    --muted:#8E99A6;
+    --line:#2A333D;
+    --gold:#F0B33A;         /* floodlight accent                        */
+    --gold-ink:#14181C;     /* text on gold                             */
+    --green:#45B27E;        /* meetup/watch tags                        */
+    --green-soft:#173226;
+    --silver:#AEB9C4;
+    --chip:#232B34;
+    --focus:#F0B33A;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#F1F2F4;
+      --card:#FFFFFF;
+      --card2:#F7F8F9;
+      --ink:#171D24;
+      --muted:#5D6773;
+      --line:#D9DDE2;
+      --gold:#A87A10;
+      --gold-ink:#FFFFFF;
+      --green:#177A4C;
+      --green-soft:#E1F0E8;
+      --silver:#4E5B67;
+      --chip:#E9EBEE;
+      --focus:#A87A10;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#F1F2F4;
+    --card:#FFFFFF;
+    --card2:#F7F8F9;
+    --ink:#171D24;
+    --muted:#5D6773;
+    --line:#D9DDE2;
+    --gold:#A87A10;
+    --gold-ink:#FFFFFF;
+    --green:#177A4C;
+    --green-soft:#E1F0E8;
+    --silver:#4E5B67;
+    --chip:#E9EBEE;
+    --focus:#A87A10;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Barlow","Segoe UI",system-ui,sans-serif;
+    font-size:16.5px; line-height:1.5;
+    -webkit-text-size-adjust:100%;
+  }
+  a{ color:var(--gold); text-decoration-thickness:1px; text-underline-offset:2px; }
+  :is(a,button,input):focus-visible{ outline:2px solid var(--focus); outline-offset:2px; border-radius:4px; }
+  .display{ font-family:"Archivo Black","Arial Black",system-ui,sans-serif; font-weight:400; }
+  .mono{ font-family:"Chivo Mono",ui-monospace,"Courier New",monospace; }
+
+  .mock-note{
+    background:var(--gold); color:var(--gold-ink);
+    font-family:"Chivo Mono",ui-monospace,monospace;
+    font-size:.7rem; letter-spacing:.08em; text-transform:uppercase;
+    text-align:center; padding:6px 12px;
+  }
+
+  /* ── Header ────────────────────────────────────────────────────── */
+  header.top{
+    position:sticky; top:0; z-index:50;
+    background:var(--bg);
+    border-bottom:1px solid var(--line);
+    padding:10px 16px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .brand{ display:flex; flex-direction:column; gap:1px; }
+  .brand .name{ font-family:"Archivo Black",sans-serif; font-size:1.05rem; letter-spacing:.02em; }
+  .brand .name em{ color:var(--gold); font-style:normal; }
+  .brand .sub{
+    font-family:"Chivo Mono",ui-monospace,monospace;
+    font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+  }
+  .clock{
+    font-family:"Chivo Mono",ui-monospace,monospace;
+    font-size:.78rem; color:var(--gold); font-variant-numeric:tabular-nums;
+    border:1px solid var(--line); border-radius:8px; padding:7px 11px; background:var(--card);
+    white-space:nowrap;
+  }
+
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 16px 88px; }
+
+  /* ── Intro strip ───────────────────────────────────────────────── */
+  .intro{ padding:30px 0 8px; max-width:720px; }
+  .intro h1{
+    font-family:"Archivo Black",sans-serif; font-weight:400;
+    font-size:clamp(1.7rem, 5.5vw, 2.7rem); line-height:1.08; margin:0 0 12px;
+    text-wrap:balance; letter-spacing:.005em;
+  }
+  .intro h1 em{ color:var(--gold); font-style:normal; }
+  .intro p{ margin:0; color:var(--muted); font-size:1.02rem; max-width:58ch; }
+  .statline{
+    display:flex; gap:18px; flex-wrap:wrap; margin-top:16px;
+    font-family:"Chivo Mono",ui-monospace,monospace;
+    font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+  }
+  .statline b{ color:var(--ink); font-weight:500; }
+
+  /* ── Layout: feed + rail ───────────────────────────────────────── */
+  .cols{ display:grid; grid-template-columns:1fr; gap:26px; margin-top:22px; }
+  @media (min-width:900px){ .cols{ grid-template-columns:1fr 320px; align-items:start; } }
+
+  /* ── Toolbar ───────────────────────────────────────────────────── */
+  .toolbar{ display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+  .search{
+    width:100%; background:var(--card); color:var(--ink);
+    border:1px solid var(--line); border-radius:10px;
+    font-family:"Barlow",sans-serif; font-size:.95rem;
+    padding:11px 14px;
+  }
+  .search::placeholder{ color:var(--muted); }
+  .chips{ display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+  .chips::-webkit-scrollbar{ display:none; }
+  .chips button{
+    font-family:"Chivo Mono",ui-monospace,monospace;
+    font-size:.7rem; letter-spacing:.06em; text-transform:uppercase;
+    background:var(--chip); color:var(--muted);
+    border:1px solid var(--line); border-radius:999px;
+    padding:7px 13px; cursor:pointer; white-space:nowrap;
+  }
+  .chips button[aria-pressed="true"]{ background:var(--gold); color:var(--gold-ink); border-color:var(--gold); }
+  .result-note{
+    font-family:"Chivo Mono",ui-monospace,monospace;
+    font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
+    margin:2px 2px 10px;
+  }
+
+  /* ── Feed cards ────────────────────────────────────────────────── */
+  .feed{ display:flex; flex-direction:column; gap:12px; }
+  .post{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:15px 16px 12px;
+  }
+  .post.pinned{ border-color:var(--gold); background:var(--card2); }
+  .p-top{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:7px; }
+  .tag{
+    font-family:"Chivo Mono",ui-monospace,monospace;
+    font-size:.6rem; letter-spacing:.1em; text-transform:uppercase;
+    padding:3px 9px; border-radius:999px;
+  }
+  .tag.event{ background:transparent; color:var(--gold); border:1px solid var(--gold); }
+  .tag.meetup{ background:var(--gold); color:var(--gold-ink); }
+  .tag.watch{ background:var(--green-soft); color:var(--green); border:1px solid var(--green); }
+  .tag.intro{ background:var(--chip); color:var(--silver); border:1px solid var(--line); }
+  .tag.question{ background:transparent; color:var(--muted); border:1px dashed var(--muted); }
+  .tag.pin{ background:var(--gold); color:var(--gold-ink); }
+  .tag.sample{ background:transparent; color:var(--muted); border:1px dashed var(--muted); }
+  .post h2{
+    font-family:"Barlow",sans-serif; font-weight:600; font-size:1.08rem;
+    line-height:1.3; margin:0 0 5px; text-wrap:balance;
+  }
+  .post .body{ margin:0; font-size:.92rem; color:var(--muted); }
+  .post .body strong{ color:var(--ink); font-weight:600; }
+  .p-meta{
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    border-top:1px solid var(--line); margin-top:11px; padding-top:9px;
+    font-family:"Chivo Mono",ui-monospace,monospace;
+    font-size:.68rem; letter-spacing:.04em; color:var(--muted);
+  }
+  .p-meta .src{ display:inline-flex; align-items:center; gap:6px; }
+  .p-meta .src::before{
+    content:""; width:7px; height:7px; border-radius:50%; background:var(--muted); display:inline-block;
+  }
+  .p-meta .src.reddit::before{ background:#E86A33; }
+  .p-meta .src.fb::before{ background:#4A78D0; }
+  .p-meta .src.form::before{ background:var(--gold); }
+  .p-meta .src.listing::before{ background:var(--green); }
+  .p-meta a{ margin-left:auto; white-space:nowrap; font-weight:500; }
+  .howto ol{ margin:6px 0 0; padding-left:1.2em; font-size:.9rem; color:var(--muted); }
+  .howto li{ margin:4px 0; }
+  .howto li strong{ color:var(--ink); }
+
+  /* ── Rail ──────────────────────────────────────────────────────── */
+  .rail{ display:flex; flex-direction:column; gap:14px; }
+  .rcard{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .rcard h3{
+    font-family:"Chivo Mono",ui-monospace,monospace; font-weight:500;
+    font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
+    margin:0 0 12px;
+  }
+  .rfacts{ margin:0; display:flex; flex-direction:column; gap:10px; }
+  .rfacts div{ display:flex; flex-direction:column; gap:1px; }
+  .rfacts dt{
+    font-family:"Chivo Mono",ui-monospace,monospace;
+    font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; color:var(--gold);
+  }
+  .rfacts dd{ margin:0; font-size:.86rem; }
+  .rcard.cta-card{ border-color:var(--gold); }
+  .rcard.cta-card p{ margin:0 0 12px; font-size:.88rem; color:var(--muted); }
+  .btn-gold{
+    display:block; width:100%; text-align:center;
+    background:var(--gold); color:var(--gold-ink);
+    font-family:"Archivo Black",sans-serif; font-size:.95rem; letter-spacing:.02em;
+    border:0; border-radius:10px; padding:13px 16px; cursor:pointer;
+  }
+  .map-note{ font-size:.75rem; color:var(--muted); margin:10px 0 0; }
+  .rlinks{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; font-size:.88rem; }
+  .rlinks .ph{ color:var(--muted); font-style:italic; }
+
+  /* ── Mobile fixed CTA ──────────────────────────────────────────── */
+  .fab{
+    position:fixed; left:16px; right:16px; bottom:14px; z-index:60;
+    background:var(--gold); color:var(--gold-ink);
+    font-family:"Archivo Black",sans-serif; font-size:1rem;
+    border:0; border-radius:12px; padding:15px; cursor:pointer;
+    box-shadow:0 6px 24px rgba(0,0,0,.35);
+  }
+  @media (min-width:900px){ .fab{ display:none; } }
+
+  /* ── Modal ─────────────────────────────────────────────────────── */
+  .overlay{
+    position:fixed; inset:0; z-index:70; background:rgba(8,10,13,.66);
+    display:flex; align-items:flex-end; justify-content:center; padding:16px;
+  }
+  @media (min-width:640px){ .overlay{ align-items:center; } }
+  .modal{
+    background:var(--card); color:var(--ink);
+    border:1px solid var(--line); border-radius:14px;
+    max-width:480px; width:100%; padding:22px;
+  }
+  .modal h2{ font-family:"Archivo Black",sans-serif; font-weight:400; font-size:1.25rem; margin:0 0 10px; }
+  .modal p{ font-size:.9rem; color:var(--muted); margin:0 0 14px; }
+  .fields{ display:flex; flex-direction:column; gap:9px; margin-bottom:14px; }
+  .fields label{
+    display:flex; flex-direction:column; gap:4px;
+    font-family:"Chivo Mono",ui-monospace,monospace;
+    font-size:.64rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+  }
+  .fields input{
+    background:var(--card2); border:1px solid var(--line); border-radius:8px;
+    color:var(--ink); font-family:"Barlow",sans-serif; font-size:.92rem; padding:10px 12px;
+  }
+  .modal .row{ display:flex; gap:10px; }
+  .btn-ghost{
+    flex:1; background:transparent; color:var(--muted);
+    border:1px solid var(--line); border-radius:10px; padding:12px; cursor:pointer;
+    font-family:"Barlow",sans-serif; font-size:.92rem;
+  }
+  .modal .btn-gold{ flex:1.4; }
+  .modal .fine{ font-size:.72rem; margin:12px 0 0; }
+
+  footer{
+    border-top:1px solid var(--line); margin-top:44px; padding:20px 2px 4px;
+    font-size:.76rem; color:var(--muted); line-height:1.7;
+  }
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+</style>
+
+<div class="mock-note">Design mockup · posts tagged “sample” show what the board collects · real listings link to their source</div>
+
+<header class="top">
+  <div class="brand">
+    <span class="name">CHARM CITY <em>SCRUM</em></span>
+    <span class="sub">Boks v All Blacks · Sep 12 · Baltimore</span>
+  </div>
+  <span class="clock" id="clock" role="timer" aria-label="Time to kickoff">T–…</span>
+</header>
+
+<div class="wrap">
+  <section class="intro">
+    <h1>Every fan landing in Baltimore. <em>One board.</em></h1>
+    <p>Meetups, watch parties, crews to join, questions answered — pulled from Reddit daily, relayed from the Facebook groups by their own members, and posted here directly. No account needed.</p>
+    <div class="statline">
+      <span>Series <b>1–1</b> · the finale decides it</span>
+      <span>Tickets sold in <b>48 states</b></span>
+      <span><b>7,400+</b> international</span>
+    </div>
+  </section>
+
+  <div class="cols">
+    <!-- FEED -->
+    <div>
+      <div class="toolbar">
+        <input class="search" id="search" type="search" placeholder="Search the board — try “Federal Hill” or “no ticket”" aria-label="Search posts">
+        <div class="chips" role="group" aria-label="Filter posts">
+          <button aria-pressed="true"  data-f="all">All</button>
+          <button aria-pressed="false" data-f="meetup">Meetups</button>
+          <button aria-pressed="false" data-f="watch">Watch parties</button>
+          <button aria-pressed="false" data-f="intro">Intros &amp; crews</button>
+          <button aria-pressed="false" data-f="question">Questions</button>
+          <button aria-pressed="false" data-f="event">Organized events</button>
+        </div>
+      </div>
+      <p class="result-note" id="result-note">Showing all 9 posts</p>
+
+      <div class="feed" id="feed">
+        <article class="post pinned howto" data-type="pinned">
+          <div class="p-top"><span class="tag pin">Pinned</span></div>
+          <h2>How this board works</h2>
+          <ol>
+            <li><strong>Post</strong> — 60-second form, no account. Meetup, intro, or question.</li>
+            <li><strong>Human check</strong> — no ticket resale, no spam, public places only.</li>
+            <li><strong>Live at the next refresh</strong> — the board updates several times a day, and new Baltimore threads on r/rugbyunion get pulled in automatically.</li>
+          </ol>
+        </article>
+
+        <article class="post" data-type="event">
+          <div class="p-top"><span class="tag event">Organized event</span></div>
+          <h2>Braai Army supporters block + TailGOAT tailgate</h2>
+          <p class="body"><strong>Sat Sep 12, from midday · outside M&amp;T Bank Stadium.</strong> The official Springbok supporters group: 650-seat supporters block inside the ground, full pre-match tailgate outside — food, drinks, music. “Commando” option if you already hold a match ticket.</p>
+          <div class="p-meta"><span class="src listing">public listing</span><span>braaiarmy.com</span><a href="https://www.braaiarmy.com/springboks-all-blacks-baltimore-old-page" target="_blank" rel="noopener">open ↗</a></div>
+        </article>
+
+        <article class="post" data-type="intro">
+          <div class="p-top"><span class="tag intro">Intro / crew</span><span class="tag sample">Sample</span></div>
+          <h2>Auckland crew of six, landing Thursday</h2>
+          <p class="body">“First time in the States. Where are AB fans drinking Friday night? We’ll bring the haka if you bring the gees. Staying near Inner Harbor.”</p>
+          <div class="p-meta"><span class="src form">via form</span><span>posted 2h ago</span><a href="#" aria-disabled="true">reply on thread ↗</a></div>
+        </article>
+
+        <article class="post" data-type="watch">
+          <div class="p-top"><span class="tag watch">Watch party</span></div>
+          <h2>UCT Alumni &amp; Friends watch party — Federal Hill</h2>
+          <p class="body"><strong>Sat Sep 12 · One Star Country Club, 38 E Cross St.</strong> University of Cape Town alumni host; food and drinks for purchase. No match ticket needed — this is the room with the gees.</p>
+          <div class="p-meta"><span class="src listing">public listing</span><span>alumni.uct.ac.za</span><a href="https://alumni.uct.ac.za/events/springboks-vs-all-black-rugby-watch-party-0" target="_blank" rel="noopener">open ↗</a></div>
+        </article>
+
+        <article class="post" data-type="question">
+          <div class="p-top"><span class="tag question">Question</span><span class="tag sample">Sample</span></div>
+          <h2>No ticket — where’s the best atmosphere to watch?</h2>
+          <p class="body">“Flying in from Denver just to be around it. Which bar will have the most fans if I couldn’t get a seat?” · 3 answers on the thread</p>
+          <div class="p-meta"><span class="src reddit">r/rugbyunion</span><span>pulled 5h ago</span><a href="#" aria-disabled="true">open thread ↗</a></div>
+        </article>
+
+        <article class="post" data-type="meetup">
+          <div class="p-top"><span class="tag meetup">Meetup</span><span class="tag sample">Sample</span></div>
+          <h2>DC Boks: Light Rail crew from Camden Yards</h2>
+          <p class="body">“Group of us coming up from DC in jerseys. Meeting 1:30 PM by the Camden Station sign, riding to the ground together, pint at Cross Street Market first. All welcome.”</p>
+          <div class="p-meta"><span class="src fb">FB · SA fans in the USA</span><span>relayed 8h ago</span><a href="#" aria-disabled="true">open post ↗</a></div>
+        </article>
+
+        <article class="post" data-type="event">
+          <div class="p-top"><span class="tag event">Organized event</span></div>
+          <h2>Gameday Firehouse pregame — 12:30 to 8:00 PM</h2>
+          <p class="body"><strong>Sat Sep 12 · 1202 Ridgely St, steps from the stadium.</strong> Converted-firehouse sports bar opening early for the match: food, drinks, and traveling fans before the short walk to the gates.</p>
+          <div class="p-meta"><span class="src listing">public listing</span><span>Visit Baltimore</span><a href="https://baltimore.org/event/all-blacks-vs-springboks-pregame-rugbys-greatest-rivalry/" target="_blank" rel="noopener">open ↗</a></div>
+        </article>
+
+        <article class="post" data-type="intro">
+          <div class="p-top"><span class="tag intro">Intro / crew</span><span class="tag sample">Sample</span></div>
+          <h2>Cape Town family of four near Inner Harbor</h2>
+          <p class="body">“Kids are 9 and 12, first trip to the US. Looking for a family-friendly braai or pre-match gathering Saturday morning — and any tips for the aquarium queue.”</p>
+          <div class="p-meta"><span class="src form">via form</span><span>posted 1d ago</span><a href="#" aria-disabled="true">reply on thread ↗</a></div>
+        </article>
+
+        <article class="post" data-type="meetup">
+          <div class="p-top"><span class="tag meetup">Meetup</span><span class="tag sample">Sample</span></div>
+          <h2>Sunday recovery touch — Federal Hill Park, 10 AM</h2>
+          <p class="body">“Morning-after touch on the hill over the harbor. All skill levels, both jerseys, sore heads welcome. Winner buys coffee.”</p>
+          <div class="p-meta"><span class="src reddit">r/rugbyunion</span><span>pulled 1d ago</span><a href="#" aria-disabled="true">open thread ↗</a></div>
+        </article>
+      </div>
+    </div>
+
+    <!-- RAIL -->
+    <aside class="rail">
+      <div class="rcard cta-card">
+        <h3>Post to the board</h3>
+        <p>Organizing something, or landing solo and looking for a crew? No account, sixty seconds.</p>
+        <button class="btn-gold" data-open-modal>+ Post to the board</button>
+      </div>
+
+      <div class="rcard">
+        <h3>Match facts</h3>
+        <dl class="rfacts">
+          <div><dt>Kickoff</dt><dd>Sat Sep 12 · 5:00 PM ET</dd></div>
+          <div><dt>Ground</dt><dd>M&amp;T Bank Stadium, 1101 Russell St</dd></div>
+          <div><dt>Transit</dt><dd>Light Rail to Hamburg St · ~20 min walk from Inner Harbor</dd></div>
+          <div><dt>Bags</dt><dd>Expect a clear-bag policy &amp; cashless stadium — check the official A–Z</dd></div>
+          <div><dt>Series</dt><dd>1–1 after Cape Town — this is the decider territory</dd></div>
+        </dl>
+      </div>
+
+      <div class="rcard">
+        <h3>Where fans gather</h3>
+        <svg viewBox="0 0 280 190" role="img" aria-label="Schematic map of Baltimore gathering spots" style="width:100%;height:auto;display:block">
+          <rect x="0" y="0" width="280" height="190" rx="8" fill="var(--card2)"/>
+          <path d="M0 118 C 60 96, 96 96, 128 112 C 156 126, 148 152, 190 150 C 230 148, 250 128, 280 132 L 280 190 L 0 190 Z"
+                fill="var(--chip)" stroke="var(--line)"/>
+          <text x="196" y="176" font-size="9" fill="var(--muted)" font-family="Chivo Mono, monospace" letter-spacing="1">THE HARBOR</text>
+          <g font-family="Chivo Mono, monospace" font-size="9.5">
+            <circle cx="58" cy="128" r="7" fill="var(--gold)"/>
+            <text x="58" y="131.5" text-anchor="middle" font-size="8.5" fill="var(--gold-ink)" font-weight="bold">M&amp;T</text>
+            <text x="58" y="150" text-anchor="middle" fill="var(--ink)">STADIUM</text>
+            <circle cx="106" cy="92" r="5" fill="var(--green)"/>
+            <text x="106" y="80" text-anchor="middle" fill="var(--muted)">FEDERAL HILL · 3</text>
+            <circle cx="152" cy="56" r="4" fill="var(--silver)"/>
+            <text x="152" y="44" text-anchor="middle" fill="var(--muted)">INNER HARBOR · 2</text>
+            <circle cx="224" cy="92" r="4" fill="var(--silver)"/>
+            <text x="224" y="80" text-anchor="middle" fill="var(--muted)">FELLS POINT · 1</text>
+          </g>
+        </svg>
+        <p class="map-note">Counts follow the board. On the live site this is a tappable map (Leaflet + OpenStreetMap).</p>
+      </div>
+
+      <div class="rcard">
+        <h3>Threads &amp; groups</h3>
+        <ul class="rlinks">
+          <li><a href="https://www.reddit.com/r/rugbyunion/" target="_blank" rel="noopener">r/rugbyunion</a> — auto-pulled daily</li>
+          <li><a href="https://www.reddit.com/r/baltimore/" target="_blank" rel="noopener">r/baltimore</a></li>
+          <li><a href="https://www.braaiarmy.com/" target="_blank" rel="noopener">Braai Army</a> — SA supporters</li>
+          <li><a href="https://www.ticketmaster.com/new-zealand-all-blacks-vs-springboks-baltimore-09-12-2026/event/Z7r9jZ1A7Osx9" target="_blank" rel="noopener">Tickets — Ticketmaster</a></li>
+          <li class="ph">Facebook groups get linked here — their posts arrive via members, since groups can’t be scraped.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    <p>Unofficial, fan-made. Not affiliated with SA Rugby, New Zealand Rugby, the Baltimore Ravens, M&amp;T Bank Stadium, or the event organizers. Always confirm details on the original post; meet in public places. Design mockup — sample posts are marked.</p>
+  </footer>
+</div>
+
+<button class="fab" data-open-modal>+ Post to the board</button>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+  <div class="modal">
+    <h2 id="modal-title">Post to the board</h2>
+    <p>On the live site this is a Google Form — no account needed. These are the only fields:</p>
+    <div class="fields">
+      <label>Name or handle <input type="text" placeholder="e.g. Sipho from Joburg" disabled></label>
+      <label>What &amp; when <input type="text" placeholder="e.g. Friday 7pm — Bok fans at Max’s Taphouse" disabled></label>
+      <label>Link (optional) <input type="text" placeholder="Your Facebook/Reddit post, so people can reply to you there" disabled></label>
+    </div>
+    <div class="row">
+      <button class="btn-ghost" data-close-modal>Close</button>
+      <button class="btn-gold" data-close-modal>Got it — mockup only</button>
+    </div>
+    <p class="fine">A human reviews every post (no ticket sales, no spam), then it appears at the next site refresh. Replies happen on your linked thread — the board never collects phone numbers or emails publicly.</p>
+  </div>
+</div>
+
+<script>
+  // Compact countdown in the header
+  (function(){
+    var T = new Date("2026-09-12T17:00:00-04:00").getTime();
+    var el = document.getElementById("clock");
+    function pad(n){ return String(n).padStart(2,"0"); }
+    function tick(){
+      var s = Math.max(0, Math.floor((T - Date.now())/1000));
+      var d = Math.floor(s/86400), h = Math.floor(s%86400/3600), m = Math.floor(s%3600/60);
+      el.textContent = "T–" + d + "d " + pad(h) + "h " + pad(m) + "m";
+    }
+    tick(); setInterval(tick, 30000);
+  })();
+
+  // Filters + search (combined)
+  (function(){
+    var chips = document.querySelectorAll(".chips button");
+    var posts = document.querySelectorAll("#feed .post");
+    var search = document.getElementById("search");
+    var note = document.getElementById("result-note");
+    var active = "all";
+    function apply(){
+      var q = search.value.trim().toLowerCase();
+      var shown = 0;
+      posts.forEach(function(p){
+        var t = p.dataset.type;
+        var okType = active === "all" || t === active || t === "pinned";
+        var okText = !q || p.textContent.toLowerCase().indexOf(q) !== -1;
+        var show = okType && okText;
+        p.hidden = !show;
+        if (show && t !== "pinned") shown++;
+      });
+      note.textContent = "Showing " + shown + (active === "all" ? "" : " “" + active + "”") + " post" + (shown === 1 ? "" : "s") + (q ? " matching “" + q + "”" : "");
+    }
+    chips.forEach(function(c){
+      c.addEventListener("click", function(){
+        chips.forEach(function(x){ x.setAttribute("aria-pressed", x === c ? "true" : "false"); });
+        active = c.dataset.f;
+        apply();
+      });
+    });
+    search.addEventListener("input", apply);
+  })();
+
+  // Modal
+  (function(){
+    var overlay = document.getElementById("overlay");
+    var openers = document.querySelectorAll("[data-open-modal]");
+    var lastFocus = null;
+    function open(){
+      lastFocus = document.activeElement;
+      overlay.hidden = false;
+      overlay.querySelector("[data-close-modal]").focus();
+    }
+    function close(){
+      overlay.hidden = true;
+      if (lastFocus) lastFocus.focus();
+    }
+    openers.forEach(function(b){ b.addEventListener("click", open); });
+    overlay.querySelectorAll("[data-close-modal]").forEach(function(b){ b.addEventListener("click", close); });
+    overlay.addEventListener("click", function(e){ if (e.target === overlay) close(); });
+    document.addEventListener("keydown", function(e){ if (e.key === "Escape" && !overlay.hidden) close(); });
+  })();
+</script>
