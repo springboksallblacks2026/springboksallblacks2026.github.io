@@ -48,6 +48,24 @@ Note: scheduled workflows pause automatically if the repo has no activity
 for 60 days — irrelevant before Sept 12, and after the match it can be
 switched off by deleting `refresh.yml`.
 
+## The visitor counter
+
+The footer shows "This site has been visited N times" via
+[GoatCounter](https://www.goatcounter.com) (free, no cookies, bot-filtered).
+One-time setup:
+
+1. Sign up at goatcounter.com with the site code
+   **`springboksallblacks2026`** (the code must match the two
+   `springboksallblacks2026.goatcounter.com` URLs near the bottom of
+   `index.html` — if you pick a different code, update those two URLs).
+2. In GoatCounter → Settings, make sure the **visitor counter** option
+   ("allow adding a visitor counter to your website") is enabled.
+3. Done. Counting starts from setup day (past visits can't be backfilled).
+   The footer line stays hidden until a count loads, so nothing looks
+   broken before setup. Your traffic dashboard — including how many
+   visitors came from Facebook vs Reddit — lives at
+   `https://springboksallblacks2026.goatcounter.com`.
+
 ## Manual updates worth knowing about
 
 - **Series score**: after Test 3 (Sept 5), update the "SERIES BAR" cells in
