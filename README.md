@@ -50,8 +50,31 @@ switched off by deleting `refresh.yml`.
 
 ## The visitor counter
 
-The footer shows "This site has been visited N times" via
-[GoatCounter](https://www.goatcounter.com) (free, no cookies, bot-filtered).
+The bottom of the page (just after the community section) shows "This site
+has been visited N times". The line stays hidden until the count is at
+least 1, so a brand-new or unreachable counter never shows a sad "0".
+
+Two counting systems work together:
+
+**A. Cloudflare Worker — the number on the page (counts everyone, ad
+blockers included).** Blockers work by blocking *known analytics domains*;
+this counter runs on your own `workers.dev` URL, which no blocklist has.
+No cookies, no IPs stored — visitors are deduped per day via an anonymous
+24-hour hash. One-time setup (~5 min, all in the browser): follow the
+step-by-step DEPLOY comment at the top of
+[`scripts/cloudflare-worker-counter.js`](scripts/cloudflare-worker-counter.js),
+then paste the worker's URL into the `COUNTER_URL` line near the bottom of
+`index.html` and push. Free-tier note: covers roughly 500 *new* visitors
+per day; past that, counting pauses until the next day (UTC) — the site
+itself is never affected.
+
+**B. GoatCounter — the traffic dashboard (and display fallback).** Your
+dashboard at `springboksallblacks2026.goatcounter.com` shows referrers
+(how many visitors came from Facebook vs Reddit), pages, and countries —
+but ad blockers block its script (`gc.zgo.at`), so it undercounts and its
+numbers will run lower than the Worker's. That's expected. If the Worker
+isn't set up or is unreachable, the page falls back to displaying
+GoatCounter's total.
 One-time setup:
 
 1. Sign up at goatcounter.com with the site code
